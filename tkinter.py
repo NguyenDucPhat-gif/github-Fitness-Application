@@ -1,0 +1,37 @@
+import tkinter as tk
+import tkinter.messagebox as mb
+
+root = tk.Tk()
+root.title('Cua so chinh')
+root.geometry("400x300+100+50") # kich thuoc 400x300, vi tri 100, 50 tren mh
+root.resizable(width = True, height = True) # cho phep thay doi kich thuoc cua so
+root.configure(bg = 'lightblue') # doi mau nen cua cua so
+
+label = tk.Label(root, text = "ayyo hello brooo cua so chinh ne <3")
+label.pack(pady = 20)
+button = tk.Button(root, text = "m gioi m chan t di", command = root.destroy)
+button.pack()
+
+mb.showinfo("thong bao","day la mot thong bao thong tin")
+mb.showwarning("canh bao","day la mot thong bao canh bao")
+mb.showerror("loi","da xay ra mot loi")
+# askquestion = thong bao xac nhan yes/no
+response = mb.askquestion("xac nhan","ban co chac chan muon tiep tuc??")
+if response == "yes":
+    print("yasss <3")
+else:
+    print("buyenn")
+# # askokcancel = thong bao xac nhan OK/cancel
+# responre = mb.askokcancel("xac nhan","g m sao? muon gi?? tiep tuc ko thi bao???")
+# if responre:
+#     print("okii")
+# else:
+#     print("cc cook")
+# # askretrycencel = thong bao xac nhan retry/cencel
+# responre = mb.askretrycancel("xac nhan","t sai hay sao? muon quay lai khong thi bao??")
+# if responre:
+#     print("m co quay lai voi t ko?")
+# else:
+#     print("dcm buyen")
+
+root.mainloop()
