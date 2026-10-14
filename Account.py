@@ -40,7 +40,7 @@ class Account(ABC):
 class Admin(Account):
     def __init__(self, username, password, fullname, email):
         super().__init__(username, password, fullname, email)
-        self.access_level = "admin"
+        self._access_level = "admin"
 
     def Access_Level(self):
         return "admin"
