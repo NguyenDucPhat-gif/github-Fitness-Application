@@ -35,7 +35,13 @@ class Account(ABC):
         "Lớp con tự ovveride phương thức này"
 
     def to_dict(self):
-        return self.__dict__  # đơn giản hóa việc chuyển sang JSON
+        return {
+        "username": self._username,
+        "password": self._password,
+        "fullname": self._fullname,
+        "email": self.email,
+        "role": self._access_level,
+    }
 
 class Admin(Account):
     def __init__(self, username, password, fullname, email):
@@ -53,3 +59,7 @@ class User(Account):
 
     def Access_Level(self):
         return "user"
+    def to_dict(self):
+      return {**super().to_dict(), "calories_aim": self._UserCalories_Aim}
+    
+    
