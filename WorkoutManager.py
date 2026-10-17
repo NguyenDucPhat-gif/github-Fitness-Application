@@ -20,10 +20,10 @@ class WorkoutManager:
         for act_in_list in self.activities_list:
            if act_in_list.activity_id == act.activity_id:     # so với phần tử đang duyệt
             return False
-           if self.db.create(act.to_dict()):       # ghi file trước
-              self.activities_list.append(act)                   # thành công mới thêm vào bộ nhớ
-              return True
-           return False
+        if self.db.create(act.to_dict()):       # ghi file trước
+             self.activities_list.append(act)                   # thành công mới thêm vào bộ nhớ
+             return True
+        return False
 
     def delete_activity(self, activity_id):            # Delete
         self.activities_list = [a for a in self.activities_list if a.activity_id != activity_id]

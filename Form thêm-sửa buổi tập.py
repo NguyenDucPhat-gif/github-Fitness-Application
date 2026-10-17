@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 import data
+
 from date_entry import create_date_entry
 from theme import apply_style
 
@@ -21,7 +22,7 @@ class SessionForm(ttk.LabelFrame):
         self.date.grid(row=0, column=1, sticky="w", **pad)
 
         ttk.Label(self, text="Môn").grid(row=0, column=2, sticky="w", **pad)
-        self.cb_sport = ttk.Combobox(self, values=list(data_store.EXERCISES),
+        self.cb_sport = ttk.Combobox(self, values=list(data.EXERCISES),
                                      state="readonly")
         self.cb_sport.grid(row=0, column=3, sticky="ew", **pad)
         self.cb_sport.bind("<<ComboboxSelected>>", self._on_sport_change)
@@ -38,7 +39,7 @@ class SessionForm(ttk.LabelFrame):
         rb = ttk.Frame(self)
         rb.grid(row=2, column=1, columnspan=3, sticky="w", **pad)
         self.var_int = tk.StringVar(value="Vừa")
-        for i, name in enumerate(data_store.INTENSITY):
+        for i, name in enumerate(data.INTENSITY):
             ttk.Radiobutton(rb, text=name, value=name, variable=self.var_int
                             ).grid(row=0, column=i, padx=8)
 
@@ -52,7 +53,7 @@ class SessionForm(ttk.LabelFrame):
 
     def _on_sport_change(self, _=None):
         """Loc bai tap theo mon da chon."""
-        self.cb_ex["values"] = data_store.EXERCISES.get(self.cb_sport.get(), [])
+        self.cb_ex["values"] = data.EXERCISES.get(self.cb_sport.get(), [])
         self.cb_ex.set("")
 
     def read(self):
@@ -71,7 +72,7 @@ class SessionForm(ttk.LabelFrame):
         inten = self.var_int.get()
         return {"date": self.date.get(), "sport": sport, "exercise": ex,
                 "minutes": minutes, "intensity": inten,
-                "cal": data_store.calc_calories(sport, minutes, inten)}
+                "cal": data.calc_calories(sport, minutes, inten)}
 
     def fill(self, s):
         """Nap 1 buoi tap vao form de sua."""

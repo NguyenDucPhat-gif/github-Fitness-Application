@@ -43,6 +43,7 @@ class DataManager:
     def create(self, item_dict):
         """Thêm một đối tượng mới (dạng dict) vào file."""
         data = self.load_data()
+       
         data.append(item_dict)
         return self.save_data(data)
 
