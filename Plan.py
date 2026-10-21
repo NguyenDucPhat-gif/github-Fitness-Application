@@ -3,18 +3,19 @@
 Plan.py - Kế hoạch luyện tập: PlanItem và TrainingPlan
 """
 import re
-from datetime import datetime
+
+DATE_PATTERN = r"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/\d{4}$"      # dd/mm/yyyy
 
 
-def parse_date(text):
-    """Đổi 'dd/mm/yyyy' thành datetime; báo lỗi nếu sai định dạng hoặc ngày không có thật."""
-    try:
-        d = datetime.strptime(text, "%d/%m/%Y")
-    except (ValueError, TypeError):
-        raise ValueError("Ngày phải có dạng dd/mm/yyyy và là ngày có thật")
-    if d.strftime("%d/%m/%Y") != text:             # chặn kiểu 1/2/2026
-        raise ValueError("Ngày phải có dạng dd/mm/yyyy (đủ 2 chữ số)")
-    return d
+def is_valid_date(text):
+    """Regular Expression: đúng dạng dd/mm/yyyy (đủ 2 chữ số ngày, tháng; 4 chữ số năm)."""
+    return isinstance(text, str) and re.match(DATE_PATTERN, text) is not None
+
+
+def date_key(text):
+    """Đổi 'dd/mm/yyyy' thành 'yyyymmdd' để so sánh và sắp xếp đúng thứ tự thời gian.
+    Chỉ dùng cho ngày đã qua is_valid_date."""
+    return text[6:] + text[3:5] + text[:2]
 
 
 class PlanItem:
@@ -30,9 +31,8 @@ class PlanItem:
 
     @date.setter
     def date(self, value):
-        if not re.match(r"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/\d{4}$", value):
+        if not is_valid_date(value):
             raise ValueError("Ngày phải có dạng dd/mm/yyyy")
-        parse_date(value)                         # chặn ngày không có thật (vd 31/02)
         self._date = value
 
     @property
@@ -71,7 +71,9 @@ class TrainingPlan:
     def __init__(self, plan_id, user_id, name, start_date, end_date, items=None):
         if not isinstance(name, str) or not name.strip():
             raise ValueError("Tên kế hoạch không được để trống")
-        if parse_date(end_date) < parse_date(start_date):
+        if not is_valid_date(start_date) or not is_valid_date(end_date):
+            raise ValueError("Ngày bắt đầu và ngày kết thúc phải có dạng dd/mm/yyyy")
+        if date_key(end_date) < date_key(start_date):
             raise ValueError("Ngày kết thúc phải sau hoặc bằng ngày bắt đầu")
         self.plan_id = plan_id
         self.user_id = user_id
@@ -86,8 +88,8 @@ class TrainingPlan:
     # ---------- (2) Quản lý danh sách mục ----------
     def add_plan_item(self, plan_item):
         """Thêm một mục; báo lỗi nếu ngày nằm ngoài kế hoạch hoặc mục bị trùng."""
-        d = parse_date(plan_item.date)
-        if d < parse_date(self.start_date) or d > parse_date(self.end_date):
+        d = date_key(plan_item.date)
+        if d < date_key(self.start_date) or d > date_key(self.end_date):
             raise ValueError("Phạm vi ngày tháng không phù hợp với kế hoạch")
         for old in self.items:
             if old.date == plan_item.date and old.exercise_id == plan_item.exercise_id:
@@ -155,7 +157,7 @@ class TrainingPlan:
             result[item.date]["planned"] += item.planned_minutes
             result[item.date]["actual"] += self._actual_for_item(item, activities)
         rows = list(result.values())
-        rows.sort(key=lambda r: parse_date(r["date"]))
+        rows.sort(key=lambda r: date_key(r["date"]))
         return rows
 
     # ---------- (5) Chuyển đổi JSON ----------
