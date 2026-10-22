@@ -42,6 +42,20 @@ class Account(ABC):
         "email": self.email,
         "role": self._access_level,
     }
+    @staticmethod
+    def from_dict(d):
+     """Đọc dữ liệu từ JSON, hỗ trợ cả key cũ (_username) và key mới (username)"""
+     username = d.get("username", d.get("_username", ""))
+     password = d.get("password", d.get("_password", ""))
+     fullname = d.get("fullname", d.get("_fullname", ""))
+     email = d.get("email", d.get("_email", ""))
+     role = d.get("role", d.get("_access_level", "user"))
+     
+     if role == "admin":
+         return Admin(username, password, fullname, email)
+     else:
+         cal_aim = d.get("calories_aim", d.get("_UserCalories_Aim", 2000))
+         return User(username, password, fullname, email, cal_aim)
 
 class Admin(Account):
     def __init__(self, username, password, fullname, email):
