@@ -1,183 +1,208 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Oct 21 12:08:30 2026
-
-@author: this pc
+Crawler.py - Crawl TRỰC TIẾP từ PlainExercise.com
+Lấy danh sách bài tập từ /exercises/ (có phân trang), parse từng <li>.
 """
-# -*- coding: utf-8 -*-
-"""
-Crawler.py - Lấy dữ liệu bài tập từ Free Exercise DB (CC0) qua PlainExercise
-rồi nối vào exercises.json.
-
-Nguồn dữ liệu:
-  - Bài tập: Free Exercise DB (CC0) - https://github.com/yuhonas/free-exercise-db
-    (PlainExercise dùng chính nguồn này; dữ liệu mở, được phép crawl/redistribute)
-  - Calo: Compendium of Physical Activities (Ainsworth et al., 2011) - giá trị MET
-    (PlainExercise dùng MET để ước tính calo)
-
-Không cần API key.
-"""
-import json
 import os
 import shutil
 import sys
-
+import time
 import requests
-
+from bs4 import BeautifulSoup
 from DataManager import DataManager
 
-# Free Exercise DB: file JSON công khai trên GitHub (raw)
-EXERCISE_DB_URL = (
-    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
-)
+# ---------- (0) Cấu hình ----------
+BASE_URL = "https://plainexercise.com"
+LIST_URL = f"{BASE_URL}/exercises/"
 TIMEOUT_SECONDS = 15
-WEIGHT_KG = 70                      # cân nặng dùng để ước tính calo (kg)
+DELAY_BETWEEN_REQUESTS = 1.0
+WEIGHT_KG = 70
 EXERCISE_FILE = "exercises.json"
-MAX_PER_SPORT = 5                   # mỗi môn lấy tối đa 5 bài tập mới
-SOURCE_LABEL = "Free Exercise DB (CC0) / MET: Compendium of Physical Activities"
+MAX_PER_SPORT = 5
+SOURCE_LABEL = "PlainExercise.com / MET: Compendium of Physical Activities"
+USER_AGENT = (
+    "Mozilla/5.0 (compatible; SportsAppCrawler/1.0; "
+    "+https://plainexercise.com) Python-requests"
+)
 
-# Môn trong ứng dụng -> cách lọc từ Free Exercise DB (theo category + từ khóa tên)
+# Từ khóa lọc theo TÊN bài tập (vì PlainExercise không có category cardio/strength)
 SPORT_QUERIES = {
-    "Running":  {"category": "cardio", "keywords": ("run", "jog", "sprint", "treadmill")},
-    "Swimming": {"category": "cardio", "keywords": ("swim", "pool", "aquatic")},
-    "Cycling":  {"category": "cardio", "keywords": ("cycl", "bike", "bicycle", "spin")},
+    "Running":  {"keywords": ("run", "jog", "sprint", "treadmill")},
+    "Swimming": {"keywords": ("swim", "pool", "aquatic")},
+    "Cycling":  {"keywords": ("cycl", "bike", "bicycle", "spin")},
 }
 
-# MET ước tính theo môn (Compendium of Physical Activities, 2011) - dùng khi
-# Free Exercise DB không có trường calo. Đây là giá trị đại diện, có thể tinh chỉnh.
-MET_BY_SPORT = {
-    "Running": 9.8,      # chạy bộ ~ 9.8 MET
-    "Swimming": 7.0,     # bơi lội ~ 7.0 MET
-    "Cycling": 7.5,      # đạp xe ~ 7.5 MET
-}
-# 1 MET = 1 kcal / kg / giờ
+MET_BY_SPORT = {"Running": 9.8, "Swimming": 7.0, "Cycling": 7.5}
 KCAL_PER_MET_PER_HOUR = 1.0
 
 
 class CrawlError(Exception):
-    """Lỗi khi lấy hoặc lưu dữ liệu từ nguồn bên ngoài (thông báo tiếng Việt)."""
+    """Lỗi khi lấy hoặc lưu dữ liệu từ nguồn bên ngoài."""
 
 
-# ---------- (1) Tải dữ liệu bài tập từ Free Exercise DB ----------
-def fetch_exercise_db(url=EXERCISE_DB_URL):
-    """Tải toàn bộ Free Exercise DB (list các dict thô). Báo CrawlError nếu lỗi."""
+# ---------- (1) Tải 1 trang danh sách, parse các <li> bài tập ----------
+def fetch_list_page(url=LIST_URL):
+    """Tải trang /exercises/ (hoặc ?page=N) và trả về list dict bài tập."""
     try:
-        response = requests.get(url, TIMEOUT_SECONDS)
+        response = requests.get(
+            url, timeout=TIMEOUT_SECONDS, headers={"User-Agent": USER_AGENT}
+        )
     except requests.exceptions.Timeout:
-        raise CrawlError("Hết thời gian chờ, nguồn dữ liệu không phản hồi")
+        raise CrawlError("Hết thời gian chờ, PlainExercise không phản hồi")
     except requests.exceptions.ConnectionError:
         raise CrawlError("Không kết nối được, hãy kiểm tra mạng Internet")
     except requests.exceptions.RequestException as e:
         raise CrawlError(f"Lỗi khi gửi yêu cầu: {e}")
 
     if response.status_code != 200:
-        raise CrawlError(f"Nguồn dữ liệu trả về mã lỗi {response.status_code}")
-    try:
-        data = response.json()
-    except ValueError:
-        raise CrawlError("Dữ liệu trả về không phải JSON hợp lệ")
-    if not isinstance(data, list):
-        raise CrawlError("Dữ liệu trả về sai cấu trúc (không phải danh sách)")
-    return data
+        raise CrawlError(f"PlainExercise trả về mã lỗi {response.status_code}")
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    exercises = []
+
+    # Tìm tất cả link /exercise/<slug>/ nằm trong <li>
+    # (dùng selector rộng rồi lọc theo href để bền với thay đổi class)
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        if not href.startswith("/exercise/") or href.rstrip("/") == "/exercise":
+            continue
+        name = a.get_text(" ", strip=True)
+        if not name:
+            continue
+
+        # Lấy metadata từ div kế bên (các <span> ngăn cách bởi dấu ·)
+        parent_li = a.find_parent("li")
+        primary_muscle, equipment, level = None, None, None
+        if parent_li:
+            meta_div = parent_li.find(
+                "div", class_=lambda c: c and "text-xs" in c
+            )
+            if meta_div:
+                # Lấy các span KHÔNG phải dấu phân cách (aria-hidden="true")
+                spans = [
+                    s.get_text(" ", strip=True)
+                    for s in meta_div.find_all("span")
+                    if s.get("aria-hidden") != "true"
+                ]
+                # spans có thể là [muscle, equipment, level] hoặc [muscle, level]
+                if len(spans) >= 2:
+                    primary_muscle = spans[0]
+                    level = spans[-1]
+                    if len(spans) == 3:
+                        equipment = spans[1]
+
+        exercises.append({
+            "name": name,
+            "url": BASE_URL + href,
+            "primary_muscles": [primary_muscle] if primary_muscle else [],
+            "equipment": equipment,
+            "level": level,
+        })
+
+    # Loại trùng theo URL
+    seen= set()
+    unique = []
+    for ex in exercises:
+        if ex["url"] in seen:
+            continue
+        seen.add(ex["url"])
+        unique.append(ex)
+
+    if not unique:
+        raise CrawlError("Không tìm thấy bài tập — cấu trúc HTML có thể đã thay đổi")
+    return unique
 
 
-# ---------- (2) Chuyển đổi sang dạng Exercise ----------
+def has_next_page(html):
+    """Kiểm tra còn trang sau không (dựa vào link rel=next)."""
+    soup = BeautifulSoup(html, "html.parser")
+    return soup.find("a", rel="next") is not None
+
+
+# ---------- (2) Lọc theo môn + tính calo ----------
 def calo_rate_from_met(sport, weight_kg=WEIGHT_KG):
-    """Tính calo/phút từ MET. Running: calo/km (ước tính qua tốc độ mặc định)."""
     met = MET_BY_SPORT.get(sport)
     if met is None or met <= 0:
         return None
-    # kcal/giờ = MET * kg * 1.0
     kcal_per_hour = met * weight_kg * KCAL_PER_MET_PER_HOUR
     if sport == "Running":
-        # Giả định tốc độ chạy trung bình 10 km/h để đổi calo/giờ -> calo/km
-        assumed_speed_kmh = 10.0
-        return round(kcal_per_hour / assumed_speed_kmh, 1)
-    return round(kcal_per_hour / 60.0, 1)   # calo/phút
+        return round(kcal_per_hour / 10.0, 1)   # giả định 10 km/h
+    return round(kcal_per_hour / 60.0, 1)
 
 
-def matches_sport(item, sport):
-    """Kiểm tra bài tập có thuộc môn thể thao mong muốn không."""
+def matches_sport(name, sport):
     query = SPORT_QUERIES.get(sport)
     if not query:
         return False
-    category = (item.get("category") or "").lower()
-    name = (item.get("name") or "").lower()
-    if category != query["category"]:
-        return False
-    return any(kw in name for kw in query["keywords"])
+    low = name.lower()
+    return any(kw in low for kw in query["keywords"])
 
 
-def convert_to_exercises(raw_items, sport, existing_names, next_number,
-                         limit=MAX_PER_SPORT):
-    """Lọc bản ghi thiếu/sai, bỏ trùng tên, đổi sang dict giống exercises.json."""
-    result = []
-    for item in raw_items:
-        if len(result) >= limit:
-            break
-        if not isinstance(item, dict):
-            continue
-        name = item.get("name")
-        if not isinstance(name, str) or not name.strip():
-            continue
-        if not matches_sport(item, sport):
-            continue
-        name = name.strip()
-        if name.lower() in existing_names:
-            continue
-        rate = calo_rate_from_met(sport)
-        if rate is None or rate <= 0:
-            continue
-        existing_names.add(name.lower())
-        result.append({
-            "exercise_id": f"E{next_number + len(result):02d}",
-            "name": name,
-            "sport": sport,
-            "calo_rate": rate,
-            # giữ thêm metadata hữu ích từ nguồn mở (có thể bỏ nếu không cần)
-            "primary_muscles": item.get("primaryMuscles", []),
-            "equipment": item.get("equipment"),
-            "source": SOURCE_LABEL,
-        })
-    return result
-
-
-# ---------- (3) Lưu vào exercises.json (có sao lưu) ----------
+# ---------- (3) Lưu file ----------
 def next_exercise_number(existing):
-    numbers = []
+    nums = []
     for e in existing:
         if isinstance(e, dict):
             eid = e.get("exercise_id", "")
             if isinstance(eid, str) and eid[1:].isdigit():
-                numbers.append(int(eid[1:]))
-    return max(numbers, default=0) + 1
+                nums.append(int(eid[1:]))
+    return max(nums, default=0) + 1
 
 
-def update_exercises(data_manager, max_per_sport=MAX_PER_SPORT):
-    """Lấy bài tập mới cho từng môn và nối vào file.
-    Trả về {'added': [...], 'errors': [...]}."""
+def update_exercises(data_manager, max_per_sport=MAX_PER_SPORT, max_pages=3):
+    """Crawl tối đa max_pages trang danh sách, lấy tối đa max_per_sport bài/môn."""
     existing = data_manager.load_data()
     names = {e.get("name", "").lower() for e in existing if isinstance(e, dict)}
     next_number = next_exercise_number(existing)
-    added = []
-    errors = []
+    added, errors = [], []
+    counted = {sport: 0 for sport in SPORT_QUERIES}
 
-    # Tải dữ liệu nguồn 1 lần, dùng cho tất cả môn
-    try:
-        raw_all = fetch_exercise_db()
-    except CrawlError as e:
-        raise CrawlError(f"Không tải được Free Exercise DB: {e}")
-
-    for sport in SPORT_QUERIES:
+    page = 1
+    while page <= max_pages:
+        url = LIST_URL if page == 1 else f"{LIST_URL}?page={page}"
         try:
-            items = convert_to_exercises(
-                raw_all, sport, names, next_number, max_per_sport
-            )
+            items = fetch_list_page(url)
         except CrawlError as e:
-            errors.append(f"{sport}: {e}")
-            continue
-        added.extend(items)
-        next_number += len(items)
+            errors.append(f"Trang {page}: {e}")
+            break
+
+        for item in items:
+            if all(counted[s] >= max_per_sport for s in SPORT_QUERIES):
+                break
+            for sport in SPORT_QUERIES:
+                if counted[sport] >= max_per_sport:
+                    continue
+                if not matches_sport(item["name"], sport):
+                    continue
+                if item["name"].lower() in names:
+                    continue
+                rate = calo_rate_from_met(sport)
+                if rate is None:
+                    continue
+                names.add(item["name"].lower())
+                added.append({
+                    "exercise_id": f"E{next_number:02d}",
+                    "name": item["name"],
+                    "sport": sport,
+                    "calo_rate": rate,
+                    "primary_muscles": item["primary_muscles"],
+                    "equipment": item["equipment"],
+                    "source": SOURCE_LABEL,
+                })
+                next_number += 1
+                counted[sport] += 1
+                break  # 1 bài chỉ gán cho 1 môn
+
+        # kiểm tra còn trang sau không
+        try:
+            r = requests.get(url, timeout=TIMEOUT_SECONDS,
+                             headers={"User-Agent": USER_AGENT})
+            if not has_next_page(r.text):
+                break
+        except requests.exceptions.RequestException:
+            break
+        page += 1
+        time.sleep(DELAY_BETWEEN_REQUESTS)
 
     if added:
         if os.path.exists(data_manager.file_path):
@@ -201,10 +226,9 @@ def main():
     for ex in result["added"]:
         print(f"  {ex['exercise_id']} | {ex['sport']:<8} | "
               f"{ex['calo_rate']:>6} | {ex['name']}")
-    for message in result["errors"]:
-        print("  Cảnh báo:", message)
+    for msg in result["errors"]:
+        print("  Cảnh báo:", msg)
 
 
 if __name__ == "__main__":
     main()
-
