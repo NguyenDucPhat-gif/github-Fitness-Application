@@ -6,8 +6,8 @@ from tkinter import ttk, messagebox
 from datetime import datetime
 
 from date_entry import create_date_entry
-from DataManager import DataManager
-from Sports import Exercise, Running, Swimming, Cycling
+from data_manager import DataManager
+from sports import Exercise, Running, Swimming, Cycling
 
 class SessionForm(ttk.LabelFrame):
     def __init__(self, master, user_id, on_save=None):

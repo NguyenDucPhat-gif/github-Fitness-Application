@@ -5,7 +5,7 @@ Created on Fri Sep 11 14:39:54 2026
 @author: this pc
 """
 
-from Sports import activity_from_dict
+from sports import activity_from_dict
 
 
 class WorkoutManager:

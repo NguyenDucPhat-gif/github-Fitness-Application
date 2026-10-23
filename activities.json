@@ -1,1 +1,35 @@
-[]
+[
+    {
+        "activity_id": "A1792741023",
+        "user_id": "Phat",
+        "type": "Swimming",
+        "exercise_id": "E03",
+        "date": "23/10/2026",
+        "duration": 50.0,
+        "distance": 18.0,
+        "intensity": "Vừa",
+        "calories": 500.0
+    },
+    {
+        "activity_id": "A1792741127",
+        "user_id": "Phat",
+        "type": "Running",
+        "exercise_id": "E01",
+        "date": "23/10/2026",
+        "duration": 50.0,
+        "distance": 0,
+        "intensity": "Vừa",
+        "calories": 0.0
+    },
+    {
+        "activity_id": "A1792741144",
+        "user_id": "Phat",
+        "type": "Running",
+        "exercise_id": "E01",
+        "date": "23/10/2026",
+        "duration": 50.0,
+        "distance": 15.0,
+        "intensity": "Vừa",
+        "calories": 900.0
+    }
+]

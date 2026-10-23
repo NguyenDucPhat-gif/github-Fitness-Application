@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['Sports.py', 'Plan.py', 'Goal.py', 'Bodymetric.py', 'Crawler.py']
+recent_files = ['sports.py', 'plan.py', 'Goal.py', 'bodymetric.py', 'crawler.py', 'accounts.json', 'account.py', 'login_sign_in_screen.py', 'session_form.py', 'filter_search.py', 'activities.json', 'date_entry.py', 'layout.py', 'theme.py', 'tkinter.py', 'treeview.py', 'data_manager.py', 'main.py', 'workout_manager.py']
 
 [main]
 version = 0.2.0

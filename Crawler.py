@@ -9,7 +9,7 @@ import sys
 import time
 import requests
 from bs4 import BeautifulSoup
-from DataManager import DataManager
+from data_manager import DataManager
 
 # ---------- (0) Cấu hình ----------
 BASE_URL = "https://plainexercise.com"

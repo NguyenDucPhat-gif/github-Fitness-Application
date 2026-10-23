@@ -1,17 +1,17 @@
 [
     {
-        "username": "admin01",
-        "password": "admin123",
+        "username": "admin",
+        "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
         "fullname": "Quản trị viên",
-        "email": "admin@gym.com",
+        "email": "admin@gmail.com",
         "role": "admin"
     },
     {
-        "username": "duc01",
-        "password": "123456",
-        "fullname": "Nguyễn Văn Đức",
-        "email": "duc@gmail.com",
+        "username": "Phat",
+        "password": "64e12eee2f9e238627a7ea88362dbdf77306ac19b4c396737ef9d5806b90a820",
+        "fullname": "Phat",
+        "email": "yeugamechat@gmail.com",
         "role": "user",
-        "calories_aim": 2200
+        "calories_aim": 2000
     }
 ]

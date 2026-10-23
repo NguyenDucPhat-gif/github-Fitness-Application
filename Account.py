@@ -6,16 +6,25 @@ Created on Sun Sep  6 01:04:16 2026
 """
 from abc import ABC, abstractmethod
 import re
+import hashlib
 
 class Account(ABC):
     def __init__(self, username, password, fullname, email):
-      
         self._username = username
-        self._password = password       
+        # Tự động băm mật khẩu khi tạo tài khoản
+        self._password = password
         self._fullname = fullname
         self.email = email
         self._access_level = ""
         
+    @staticmethod
+    def hash_password(password):
+        """Chuyển mật khẩu thành chuỗi băm SHA-256"""
+        return hashlib.sha256(password.encode('utf-8')).hexdigest()
+        
+    def Sign_In(self, password_input):
+        # Băm mật khẩu người dùng nhập vào rồi so sánh với chuỗi băm đã lưu
+        return self._password == self.hash_password(password_input)
     @property 
     def email(self) :
        return self._email
@@ -27,8 +36,7 @@ class Account(ABC):
       raise ValueError("Email không hợp lệ")
      self._email= value
      
-    def Sign_In(self, password_input):
-        return self._password == password_input
+    
 
     @abstractmethod
     def Access_Level(self):
