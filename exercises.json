@@ -1,0 +1,104 @@
+[
+    {
+        "exercise_id": "E01",
+        "name": "Chạy nhẹ",
+        "sport": "Running",
+        "calo_rate": 60
+    },
+    {
+        "exercise_id": "E02",
+        "name": "Chạy interval",
+        "sport": "Running",
+        "calo_rate": 75
+    },
+    {
+        "exercise_id": "E03",
+        "name": "Bơi ếch",
+        "sport": "Swimming",
+        "calo_rate": 10
+    },
+    {
+        "exercise_id": "E04",
+        "name": "Bơi sải",
+        "sport": "Swimming",
+        "calo_rate": 8
+    },
+    {
+        "exercise_id": "E05",
+        "name": "Đạp trong nhà",
+        "sport": "Cycling",
+        "calo_rate": 7
+    },
+    {
+        "exercise_id": "E06",
+        "name": "Đạp leo dốc",
+        "sport": "Cycling",
+        "calo_rate": 12
+    },
+    {
+        "exercise_id": "E07",
+        "name": "Bicycling",
+        "sport": "Cycling",
+        "calo_rate": 8.8,
+        "primary_muscles": [
+            "quadriceps"
+        ],
+        "equipment": "other",
+        "source": "Free Exercise DB (CC0) / MET: Compendium"
+    },
+    {
+        "exercise_id": "E08",
+        "name": "Bicycling, Stationary",
+        "sport": "Cycling",
+        "calo_rate": 8.8,
+        "primary_muscles": [
+            "quadriceps"
+        ],
+        "equipment": "machine",
+        "source": "Free Exercise DB (CC0) / MET: Compendium"
+    },
+    {
+        "exercise_id": "E09",
+        "name": "Jogging, Treadmill",
+        "sport": "Running",
+        "calo_rate": 68.6,
+        "primary_muscles": [
+            "quadriceps"
+        ],
+        "equipment": "machine",
+        "source": "Free Exercise DB (CC0) / MET: Compendium"
+    },
+    {
+        "exercise_id": "E10",
+        "name": "Prowler Sprint",
+        "sport": "Running",
+        "calo_rate": 68.6,
+        "primary_muscles": [
+            "hamstrings"
+        ],
+        "equipment": "other",
+        "source": "Free Exercise DB (CC0) / MET: Compendium"
+    },
+    {
+        "exercise_id": "E11",
+        "name": "Recumbent Bike",
+        "sport": "Cycling",
+        "calo_rate": 8.8,
+        "primary_muscles": [
+            "quadriceps"
+        ],
+        "equipment": "machine",
+        "source": "Free Exercise DB (CC0) / MET: Compendium"
+    },
+    {
+        "exercise_id": "E12",
+        "name": "Running, Treadmill",
+        "sport": "Running",
+        "calo_rate": 68.6,
+        "primary_muscles": [
+            "quadriceps"
+        ],
+        "equipment": "machine",
+        "source": "Free Exercise DB (CC0) / MET: Compendium"
+    }
+]

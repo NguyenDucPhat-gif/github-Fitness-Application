@@ -1,0 +1,11 @@
+[
+    {
+        "name": "Plan A",
+        "sport": "Tất cả",
+        "target_minutes": 40,
+        "start": "29/10/2026",
+        "end": "06/11/2026",
+        "owner": "admin",
+        "id": 1
+    }
+]

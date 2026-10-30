@@ -1,0 +1,12 @@
+[workspace]
+restore_data_on_startup = True
+save_data_on_exit = True
+save_history = True
+save_non_project_files = False
+project_type = 'empty-project-type'
+recent_files = ['main.py', 'README.md', 'account_dialogs.py', 'tkinter.py', 'treeview.py', 'workout_manager.py', 'sports.py', 'theme.py', 'crawler.py', 'dialogs.py', 'exercises.json', 'filter_search.py', 'goal.py', 'layout.py', 'login_sign_in_screen.py', 'plan_tab.py', 'plan.py', 'session_tab.py', 'config.py', 'exercises.json.bak', 'session_form.py', 'account.py', 'accounts.json', 'activities.json', 'bodymetric_dialog.py', 'bodymetric.py', 'bodymetrics.json', 'custom_widgets.py', 'plans.json']
+
+[main]
+version = 0.2.0
+recent_files = []
+

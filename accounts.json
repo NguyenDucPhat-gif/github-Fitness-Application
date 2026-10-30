@@ -1,0 +1,25 @@
+[
+    {
+        "username": "admin",
+        "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "fullname": "Quản trị viên",
+        "email": "admin@gmail.com",
+        "role": "admin"
+    },
+    {
+        "username": "Nhi",
+        "password": "69f8f5b307bb5afa82be64daf85ef0df04acb17d086b29b1b5f30316b2352a97",
+        "fullname": "Nhi",
+        "email": "phatdeptrai@gmail.com",
+        "role": "user",
+        "calories_aim": 2000
+    },
+    {
+        "username": "ducphat",
+        "password": "3c6b265eed880461f07b4c4f905f9b5d398710163d7798a3d1b3aec2954e02f5",
+        "fullname": "ducphat",
+        "email": "yeuga@gmail.com",
+        "role": "user",
+        "calories_aim": 500
+    }
+]

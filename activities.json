@@ -1,0 +1,35 @@
+[
+    {
+        "activity_id": "A1793253019",
+        "user_id": "admin",
+        "type": "Running",
+        "exercise_id": "E02",
+        "date": "29/10/2026",
+        "duration": 20.0,
+        "distance": 12.0,
+        "intensity": "Cao",
+        "calories": 1170.0
+    },
+    {
+        "activity_id": "A1793254231",
+        "user_id": "ducphat",
+        "type": "Swimming",
+        "exercise_id": "E03",
+        "date": "29/10/2026",
+        "duration": 50.0,
+        "distance": 0,
+        "intensity": "Vừa",
+        "calories": 500.0
+    },
+    {
+        "activity_id": "A1793254249",
+        "user_id": "ducphat",
+        "type": "Swimming",
+        "exercise_id": "E04",
+        "date": "29/10/2026",
+        "duration": 20.0,
+        "distance": 0,
+        "intensity": "Vừa",
+        "calories": 160.0
+    }
+]
