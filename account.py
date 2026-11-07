@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Sep  6 01:04:16 2026
-
-@author: this pc
-"""
 from abc import ABC, abstractmethod
 import re
 import hashlib
@@ -19,7 +14,6 @@ class Account(ABC):
         
     @staticmethod
     def hash_password(password):
-        """Chuyển mật khẩu thành chuỗi băm SHA-256"""
         return hashlib.sha256(password.encode('utf-8')).hexdigest()
         
     def Sign_In(self, password_input):
@@ -39,7 +33,7 @@ class Account(ABC):
 
     @abstractmethod
     def Access_Level(self):
-        "Lớp con tự ovveride phương thức này"
+        pass
 
     def to_dict(self):
         return {
@@ -51,17 +45,16 @@ class Account(ABC):
     }
     @staticmethod
     def from_dict(d):
-     """Đọc dữ liệu từ JSON, hỗ trợ cả key cũ (_username) và key mới (username)"""
-     username = d.get("username", d.get("_username", ""))
-     password = d.get("password", d.get("_password", ""))
-     fullname = d.get("fullname", d.get("_fullname", ""))
-     email = d.get("email", d.get("_email", ""))
-     role = d.get("role", d.get("_access_level", "user"))
+     username = d.get("username", "")
+     password = d.get("password", "")
+     fullname = d.get("fullname", "")
+     email = d.get("email", "")
+     role = d.get("role", "user")
      
      if role == "admin":
          return Admin(username, password, fullname, email)
      else:
-         cal_aim = d.get("calories_aim", d.get("_UserCalories_Aim", 2000))
+         cal_aim = d.get("calories_aim", 2000)
          return User(username, password, fullname, email, cal_aim)
 
 class Admin(Account):
