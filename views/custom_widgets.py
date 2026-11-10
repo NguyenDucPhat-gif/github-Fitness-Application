@@ -5,7 +5,7 @@
 import math
 import tkinter as tk
 
-from theme import (ACCENT, BORDER, COLOR_HIGH, COLOR_LOW, COLOR_MID, FONT, FONT_BOLD, FONT_SMALL)
+from views.theme import (ACCENT, BORDER, COLOR_HIGH, COLOR_LOW, COLOR_MID, FONT, FONT_BOLD, FONT_SMALL)
 
 def progress_color(pct):
     if pct < 40:
@@ -109,7 +109,7 @@ class BarChart(tk.Canvas):
 
 if __name__ == "__main__":
     from tkinter import ttk
-    from theme import apply_style
+    from views.theme import apply_style
     root = tk.Tk()
     root.title("Demo custom widgets")
     apply_style(root)

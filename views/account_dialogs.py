@@ -4,8 +4,8 @@ import tkinter as tk
 from tkinter import ttk
 
 import config
-import data
-from theme import BG
+import views.data as data
+from views.theme import BG
 
 
 class AccountListDialog(tk.Toplevel):

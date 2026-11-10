@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from data_manager import DataManager
-from account import Account, User
-from theme import BG, ACCENT, FONT, FONT_BOLD, FONT_TITLE, apply_style
+from controllers.data_manager import DataManager
+from models.account import Account, User
+from views.theme import BG, ACCENT, FONT, FONT_BOLD, FONT_TITLE, apply_style
  
 class ChangePasswordDialog(tk.Toplevel):
     """Hộp thoại Đổi mật khẩu (Dùng chung cho cả ở màn hình Login và trong App)"""

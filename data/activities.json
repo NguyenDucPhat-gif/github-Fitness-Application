@@ -31,5 +31,16 @@
         "distance": 0,
         "intensity": "Vừa",
         "calories": 160.0
+    },
+    {
+        "activity_id": "A1794202329",
+        "user_id": "admin",
+        "type": "Swimming",
+        "exercise_id": "E04",
+        "date": "09/11/2026",
+        "duration": 5.0,
+        "distance": 0,
+        "intensity": "Vừa",
+        "calories": 40.0
     }
 ]

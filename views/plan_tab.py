@@ -4,11 +4,11 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 import config
-from custom_widgets import BarChart, CircularProgress
-from date_entry import create_date_entry
-from dialogs import confirm_delete
-from theme import ROW_DONE, ROW_LATE
-from data_manager import DataManager
+from views.custom_widgets import BarChart, CircularProgress
+from views.date_entry import create_date_entry
+from views.dialogs import confirm_delete
+from views.theme import ROW_DONE, ROW_LATE
+from controllers.data_manager import DataManager
 
 PLAN_COLS = [("id", "ID", 40), ("name", "Tên kế hoạch", 170), ("sport", "Môn", 80),
              ("target", "Mục tiêu (phút)", 100), ("done", "Đã tập (phút)", 95),

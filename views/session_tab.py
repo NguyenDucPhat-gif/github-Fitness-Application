@@ -4,11 +4,11 @@ import csv
 from tkinter import ttk, messagebox, filedialog
 
 import config
-import data
-from treeview import SessionTable
-from session_form import SessionForm
-from filter_search import FilterBar, filter_sessions
-from dialogs import confirm_delete
+import views.data as data
+from views.treeview import SessionTable
+from views.session_form import SessionForm
+from views.filter_search import FilterBar, filter_sessions
+from views.dialogs import confirm_delete
 
 
 class SessionTab(ttk.Frame):

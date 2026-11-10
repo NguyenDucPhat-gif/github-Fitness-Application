@@ -1,19 +1,17 @@
-# -*- coding: utf-8 -*-
-"""
-Goal.py - Mục tiêu: đạt tổng số phút hoặc calo trong một khoảng ngày
-(dùng is_valid_date và date_key có sẵn trong Plan.py)
-"""
-from Plan import is_valid_date, date_key
+
+from datetime import datetime
+
+from models.plan import is_valid_date, date_key
 
 
 class Goal:
-    """Mục tiêu của một người dùng: đạt tổng số phút hoặc calo trong một khoảng ngày."""
-    GOAL_TYPES = ["minutes", "calories"]                 # loại mục tiêu cho phép
-    SPORTS = ["Running", "Swimming", "Cycling"]          # môn cho phép (None = tất cả các môn)
-
-    # ---------- (1) Khởi tạo ----------
+    
+    GOAL_TYPES = ["minutes", "calories"]                
+    SPORTS = ["Running", "Swimming", "Cycling"]         
+   
     def __init__(self, goal_id, user_id, name, goal_type, target_value,
                  start_date, end_date, sport=None):
+        today_str = datetime.now().strftime("%d/%m/%Y") 
         if not isinstance(name, str) or not name.strip():
             raise ValueError("Tên mục tiêu không được để trống")
         if goal_type not in Goal.GOAL_TYPES:
@@ -22,6 +20,8 @@ class Goal:
             raise ValueError("Chỉ tiêu phải là số lớn hơn 0")
         if not is_valid_date(start_date) or not is_valid_date(end_date):
             raise ValueError("Ngày bắt đầu và ngày kết thúc phải có dạng dd/mm/yyyy")
+        if date_key(start_date) < date_key(today_str):
+            raise ValueError("Ngày bắt đầu không được ở trong quá khứ")
         if date_key(end_date) < date_key(start_date):
             raise ValueError("Ngày kết thúc phải sau hoặc bằng ngày bắt đầu")
         if sport is not None and sport not in Goal.SPORTS:
@@ -35,9 +35,8 @@ class Goal:
         self.end_date = end_date
         self.sport = sport
 
-    # ---------- (2) Tính tiến độ từ các buổi tập thật ----------
+   
     def get_current_value(self, activities):
-        """Tổng phút (hoặc calo) đã đạt được trong khoảng ngày của mục tiêu."""
         start = date_key(self.start_date)
         end = date_key(self.end_date)
         total = 0
@@ -56,14 +55,13 @@ class Goal:
         return round(total, 1)
 
     def get_progress(self, activities):
-        """Tiến độ (%), tối đa 100 (dùng cho CircularProgress)."""
         percent = self.get_current_value(activities) / self.target_value * 100
         if percent > 100:
             percent = 100
         return round(percent, 1)
 
     def get_remaining(self, activities):
-        """Còn thiếu bao nhiêu để đạt mục tiêu (không âm)."""
+        
         remaining = self.target_value - self.get_current_value(activities)
         if remaining < 0:
             remaining = 0
@@ -72,7 +70,7 @@ class Goal:
     def is_achieved(self, activities):
         return self.get_current_value(activities) >= self.target_value
 
-    # ---------- (3) Chuyển đổi JSON ----------
+   
     def to_dict(self):
         return {"goal_id": self.goal_id, "user_id": self.user_id, "name": self.name,
                 "goal_type": self.goal_type, "target_value": self.target_value,

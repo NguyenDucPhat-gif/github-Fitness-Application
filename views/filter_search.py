@@ -3,12 +3,12 @@ import difflib
 import tkinter as tk
 from tkinter import ttk
 import config
-from date_entry import create_date_entry
-from theme import apply_style
+from views.date_entry import create_date_entry
+from views.theme import apply_style
 
 
 def filter_sessions(sessions, sport="Tất cả", day=None, keyword=""):
-    """Loc danh sach theo mon, ngay (dd/mm/yyyy hoac None) va tu khoa."""
+    
     kw = keyword.strip().lower()
     out = []
     for s in sessions:

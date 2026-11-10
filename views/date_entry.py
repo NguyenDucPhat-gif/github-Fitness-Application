@@ -6,7 +6,7 @@ from tkinter import messagebox
 
 from tkcalendar import DateEntry
 
-from theme import DATE_FMT, apply_style
+from views.theme import DATE_FMT, apply_style
 
 
 def create_date_entry(parent, width=12):

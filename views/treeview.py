@@ -2,11 +2,11 @@
 import tkinter as tk
 from tkinter import ttk
 
-from theme import apply_style
+from views.theme import apply_style
 
-COLS = [("id", "ID", 50), ("date", "Ngày", 90), ("sport", "Môn", 100),
-        ("exercise", "Bài tập", 140), ("minutes", "Phút", 60),
-        ("intensity", "Cường độ", 80), ("cal", "Calo", 70)]
+COLS = [("id", "ID", 80), ("date", "Ngày", 90), ("sport", "Môn", 90),
+        ("exercise", "Bài tập", 130), ("minutes", "Phút", 50),
+        ("distance", "Quãng đường", 80), ("intensity", "Cường độ", 70), ("cal", "Calo", 60)]
 
 
 class SessionTable(ttk.LabelFrame):
@@ -37,9 +37,13 @@ class SessionTable(ttk.LabelFrame):
         """Do danh sach dict vao bang."""
         self.tree.delete(*self.tree.get_children())
         for s in rows:
+            dist = s.get("distance", 0)
+            dist_str = f"{dist} km" if dist > 0 else "-"
+
             self.tree.insert("", "end", iid=str(s["id"]), values=(
                 s["id"], s["date"], s["sport"], s["exercise"],
-                s["minutes"], s["intensity"], s["cal"]))
+                s["minutes"], dist_str, s["intensity"], s["cal"]))
+            
         self.lbl_total.config(
             text=f"{len(rows)} buổi - tổng {sum(s['cal'] for s in rows)} calo")
 
@@ -55,7 +59,12 @@ class SessionTable(ttk.LabelFrame):
             if key == "date":                  # dd/mm/yyyy -> yyyymmdd
                 d, m, y = v.split("/")
                 return y + m + d
-            return float(v) if key in ("id", "minutes", "cal") else v.lower()
+            if key in ("minutes", "cal"):
+                try:
+                    return float(v)
+                except ValueError:
+                    return 0.0
+            return str(v).lower()
 
         rows = [(self.tree.set(i, key), i) for i in self.tree.get_children("")]
         rows.sort(key=lambda r: conv(r[0]), reverse=desc)

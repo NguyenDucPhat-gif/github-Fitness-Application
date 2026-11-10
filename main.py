@@ -5,24 +5,24 @@ import config
 from datetime import datetime
 
 
-from theme import apply_style, BG, ACCENT, FONT_BOLD
-from login_sign_in_screen import LoginFrame, ChangePasswordDialog
-from filter_search import FilterBar, filter_sessions
-from treeview import SessionTable
-from session_form import SessionForm
-from bodymetric_dialog import BodyMetricDialog
-from plan_tab import PlanTab  
+from views.theme import apply_style, BG, ACCENT, FONT_BOLD
+from views.login_sign_in_screen import LoginFrame, ChangePasswordDialog
+from views.filter_search import FilterBar, filter_sessions
+from views.treeview import SessionTable
+from views.session_form import SessionForm
+from views.bodymetric_dialog import BodyMetricDialog
+from views.plan_tab import PlanTab  
 
 
-from data_manager import DataManager
-from account import Account, Admin, User 
-from sports import Exercise
-from workout_manager import WorkoutManager
-from crawler import update_exercises, CrawlError
-import data # Dùng cho tính năng nhắc lịch
+from controllers.data_manager import DataManager
+from models.account import Account, Admin, User 
+from models.sports import Exercise
+from controllers.workout_manager import WorkoutManager
+from controllers.crawler import update_exercises
+import views.data as data # Dùng cho tính năng nhắc lịch
 
 
-from custom_widgets import CircularProgress, BarChart
+from views.custom_widgets import CircularProgress, BarChart
 
 class FitnessApp:
     def __init__(self, root):
@@ -209,6 +209,7 @@ class FitnessApp:
                     "sport": a.activity_type,
                     "exercise": a.exercise.name if a.exercise else "",
                     "minutes": a.duration,
+                    "distance": a.distance,
                     "intensity": a.intensity,
                     "cal": a.calories 
                 })
@@ -403,19 +404,18 @@ class FitnessApp:
             messagebox.showerror("Lỗi", f"Không thể mở form BMI: {e}")
 
     def run_crawler(self):
-        """Chạy crawler ngầm để không treo giao diện (Đã bỏ lambda)"""
         def task():
             try:
                 dm = DataManager(config.EXERCISES_FILE)
-                res = update_exercises(dm, max_per_sport=config.CRAWLER_MAX_PER_SPORT)
+                added_list = update_exercises(dm, max_per_sport=config.CRAWLER_MAX_PER_SPORT)
                 
-                print("KẾT QUẢ CÀO:", res)
+                print("KẾT QUẢ CÀO:", added_list)
                 
                 self.exercises = [Exercise.from_dict(d) for d in dm.load_data()]
                 self.wm.exercises = {e.exercise_id: e for e in self.exercises}
                 self.form.exercises = self.exercises
                 
-                msg = f"Đã thêm {len(res['added'])} bài tập mới từ web!"
+                msg = f"Đã thêm {len(added_list)} bài tập mới từ web!"
                 
                 def show_success():
                     messagebox.showinfo("Crawl thành công", msg)
@@ -423,7 +423,7 @@ class FitnessApp:
                     
                 self.root.after(0, show_success)
                 
-            except CrawlError as e:
+            except Exception as e:
                 print("LỖI CRAWL:", e)
                 err_msg = str(e)
                 

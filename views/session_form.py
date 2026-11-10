@@ -4,10 +4,10 @@ from tkinter import ttk, messagebox
 from datetime import datetime
 import config
 
-from date_entry import create_date_entry
-from data_manager import DataManager
-from sports import Exercise, Running, Swimming, Cycling
-from theme import apply_style
+from views.date_entry import create_date_entry
+from controllers.data_manager import DataManager
+from models.sports import Exercise, Running, Swimming, Cycling
+from views.theme import apply_style
 
 class SessionForm(ttk.LabelFrame):
     def __init__(self, master, user_id, on_save=None, on_edit=None, on_delete=None):

@@ -87,13 +87,13 @@ class Running(SportActivity):
         self.activity_type = "Running"
 
     def calculate_calories(self):    
-        rate = self.exercise.calo_rate if self.exercise else 65
-        return round(self.distance * rate * self.intensity_factor, 1)
+        rate = self.exercise.calo_rate if self.exercise else 10
+        return round(self.duration * rate * self.intensity_factor, 1)
 
     def get_summary(self):
-        speed = round(self.distance / (self.duration / 60), 1)
-        return f"Chạy {self.distance}km, {speed} km/h, đốt {self.calories} calo"
-
+         if self.distance > 0:
+            return f"Chạy {self.distance}km trong {self.duration} phút, đốt {self.calories} calo"
+         return f"Chạy {self.duration} phút, đốt {self.calories} calo"
 
 class Swimming(SportActivity):
     def __init__(self, activity_id, user_id, date, duration, distance=0,

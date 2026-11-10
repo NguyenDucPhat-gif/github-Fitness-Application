@@ -2,9 +2,10 @@
 from pathlib import Path
 
 # --- Đường dẫn file dữ liệu (Dùng cho main.py, crawler.py) ---
-EXERCISES_FILE = "exercises.json"
-ACCOUNTS_FILE = "accounts.json"
-ACTIVITIES_FILE = "activities.json"
+ACCOUNTS_FILE = "data/accounts.json"
+ACTIVITIES_FILE = "data/activities.json"
+EXERCISES_FILE = "data/exercises.json"
+
 
 # --- Đường dẫn dữ liệu (Dùng cho data.py) ---
 BASE_DIR = Path(__file__).resolve().parent

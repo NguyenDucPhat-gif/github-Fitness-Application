@@ -1,9 +1,8 @@
 import re
 
-DATE_PATTERN = r"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/\d{4}$" 
+
 
 class BodyMetric:
-    """Một lần đo chỉ số cơ thể của một người dùng."""
     MIN_WEIGHT = 20       # kg
     MAX_WEIGHT = 300
     MIN_HEIGHT = 50       # cm
@@ -22,8 +21,9 @@ class BodyMetric:
 
     @date.setter
     def date(self, value):
-        if not re.match(DATE_PATTERN, value):
-              raise ValueError("Ngày phải có dạng dd/mm/yyyy")
+        pattern =r"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/\d{4}$" 
+        if not re.match(pattern, value):  
+           raise ValueError("Ngày phải có dạng dd/mm/yyyy")
         self._date = value
 
     @property
@@ -34,8 +34,8 @@ class BodyMetric:
     def weight_kg(self, value):
         if not isinstance(value, (int, float)):
             raise ValueError("Cân nặng phải là số")
-        if value < BodyMetric.MIN_WEIGHT or value > BodyMetric.MAX_WEIGHT:
-            raise ValueError(f"Cân nặng phải từ {BodyMetric.MIN_WEIGHT} đến {BodyMetric.MAX_WEIGHT} kg")
+        if value <self.MIN_WEIGHT or value > self.MAX_WEIGHT:
+            raise ValueError(f"Cân nặng phải từ {self.MIN_WEIGHT} đến {self.MAX_WEIGHT} kg")
         self._weight_kg = value
 
     @property
@@ -46,7 +46,7 @@ class BodyMetric:
     def height_cm(self, value):
         if not isinstance(value, (int, float)):
             raise ValueError("Chiều cao phải là số")
-        if value < BodyMetric.MIN_HEIGHT or value > BodyMetric.MAX_HEIGHT:
+        if value < self.MIN_HEIGHT or value > self.MAX_HEIGHT:
             raise ValueError(f"Chiều cao phải từ {BodyMetric.MIN_HEIGHT} đến {BodyMetric.MAX_HEIGHT} cm")
         self._height_cm = value
 

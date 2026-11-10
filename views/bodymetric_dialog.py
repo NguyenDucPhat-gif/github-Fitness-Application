@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime
-from bodymetric import BodyMetric
-from data_manager import DataManager
-from date_entry import create_date_entry
-from theme import BG
+from models.bodymetric import BodyMetric
+from controllers.data_manager import DataManager
+from views.date_entry import create_date_entry
+from views.theme import BG
 
 class BodyMetricDialog(tk.Toplevel):
     def __init__(self, master, username):

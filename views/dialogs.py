@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from theme import apply_style
+from views.theme import apply_style
 
 def confirm(title, message, warning=False):
     """True neu nguoi dung chon Yes."""
