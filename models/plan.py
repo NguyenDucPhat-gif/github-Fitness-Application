@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 import re
 
 
@@ -11,6 +12,10 @@ def is_valid_date(text):
 
 def date_key(text):
     return text[6:] + text[3:5] + text[:2]
+
+def date_with_now(date_str):
+    today_str = datetime.now().strftime("%d/%m/%Y")
+    return date_key(today_str) <= date_key(date_str)
 
 
 class PlanItem:
@@ -64,6 +69,8 @@ class TrainingPlan:
     def __init__(self, plan_id, user_id, name, start_date, end_date, items=None):
         if not isinstance(name, str) or not name.strip():
             raise ValueError("Tên kế hoạch không được để trống")
+        if date_with_now(start_date) is False:
+             raise ValueError("Ngày bắt đầu không được ở trong quá khứ")
         if not is_valid_date(start_date) or not is_valid_date(end_date):
             raise ValueError("Ngày bắt đầu và ngày kết thúc phải có dạng dd/mm/yyyy")
         if date_key(end_date) < date_key(start_date):
@@ -95,10 +102,9 @@ class TrainingPlan:
         return False
 
     def get_items_by_date(self, date):
-        """Các mục dự kiến trong một ngày (dùng cho nhắc lịch)."""
         return [item for item in self.items if item.date == date]
 
-    # ---------- (3) Thuộc tính tính toán ----------
+  
     @property
     def total_planned_minutes(self):
         total = 0
@@ -106,9 +112,8 @@ class TrainingPlan:
             total += item.planned_minutes
         return total
 
-    # ---------- (4) Nghiệp vụ: so với buổi tập thật ----------
-    def _actual_for_item(self, item, activities):
-        """Số phút thật cho MỘT mục, tối đa bằng số phút dự kiến của mục đó."""
+
+    def get_done_minutes(self, item, activities):
         done = 0
         for a in activities:
             if a.user_id != self.user_id:
@@ -124,33 +129,30 @@ class TrainingPlan:
             done = item.planned_minutes
         return done
 
-    def get_actual_minutes(self, activities):
-        """Tổng số phút đã tập theo kế hoạch."""
+    def get_total_done_minutes(self, activities):
         total = 0
         for item in self.items:
-            total += self._actual_for_item(item, activities)
+            total += self.get_done_minutes(item, activities)
         return total
 
     def get_completion(self, activities):
-        """Mức hoàn thành (%) = phút đã tập / phút dự kiến."""
         planned = self.total_planned_minutes
         if planned == 0:
             return 0.0
-        return round(self.get_actual_minutes(activities) / planned * 100, 1)
+        return round(self.get_total_done_minutes(activities) / planned * 100, 1)
 
     def get_progress_by_date(self, activities):
-        """Danh sách [{'date','planned','actual'}] theo từng ngày (dùng vẽ biểu đồ)."""
         result = {}
         for item in self.items:
             if item.date not in result:
                 result[item.date] = {"date": item.date, "planned": 0, "actual": 0}
             result[item.date]["planned"] += item.planned_minutes
-            result[item.date]["actual"] += self._actual_for_item(item, activities)
+            result[item.date]["actual"] += self.get_done_minutes(item, activities)
         rows = list(result.values())
         rows.sort(key=lambda r: date_key(r["date"]))
         return rows
 
-    # ---------- (5) Chuyển đổi JSON ----------
+   
     def to_dict(self):
         return {"plan_id": self.plan_id, "user_id": self.user_id, "name": self.name,
                 "start_date": self.start_date, "end_date": self.end_date,
