@@ -20,7 +20,6 @@ class Exercise:
         return Exercise(d["exercise_id"], d["name"], d["sport"], d["calo_rate"])
         
 class SportActivity:
-    """Lớp cha: một buổi tập."""
     def __init__(self, activity_id, user_id, date, duration, distance=0,
                  exercise=None, intensity="Vừa"):
         self.activity_id = activity_id
@@ -61,10 +60,11 @@ class SportActivity:
         return self.calculate_calories()
 
     def calculate_calories(self):     
-        return 0
+         rate = self.exercise.calo_rate if self.exercise else 10
+         return round(self.duration * rate * self.intensity_factor, 1)
 
     def get_summary(self):             
-        return ""
+        return f"{self.duration} phút, đốt {self.calories} calo"
 
     def to_dict(self):
         return {
@@ -86,14 +86,12 @@ class Running(SportActivity):
                          exercise, intensity)
         self.activity_type = "Running"
 
-    def calculate_calories(self):    
-        rate = self.exercise.calo_rate if self.exercise else 10
-        return round(self.duration * rate * self.intensity_factor, 1)
 
     def get_summary(self):
-         if self.distance > 0:
-            return f"Chạy {self.distance}km trong {self.duration} phút, đốt {self.calories} calo"
-         return f"Chạy {self.duration} phút, đốt {self.calories} calo"
+        tail = super().get_summary() 
+        if self.distance > 0:
+            return f"Chạy {self.distance}km trong {tail}"
+        return f"Chạy {tail}"
 
 class Swimming(SportActivity):
     def __init__(self, activity_id, user_id, date, duration, distance=0,
@@ -102,12 +100,9 @@ class Swimming(SportActivity):
                          exercise, intensity)
         self.activity_type = "Swimming"
 
-    def calculate_calories(self):      
-        rate = self.exercise.calo_rate if self.exercise else 8
-        return round(self.duration * rate * self.intensity_factor, 1)
-
     def get_summary(self):
-        return f"Bơi {self.duration} phút, đốt {self.calories} calo"
+        tail = super().get_summary()
+        return f"Bơi {tail}"
 
 
 class Cycling(SportActivity):
@@ -117,19 +112,17 @@ class Cycling(SportActivity):
                          exercise, intensity)
         self.activity_type = "Cycling"
 
-    def calculate_calories(self):      
-        rate = self.exercise.calo_rate if self.exercise else 8
-        return round(self.duration * rate * self.intensity_factor, 1)
 
     def get_summary(self):
-        return f"Đạp xe {self.distance}km, đốt {self.calories} calo"
-
+        tail = super().get_summary()
+        if self.distance > 0:
+            return f"Đạp xe {self.distance}km trong {tail}"
+        return f"Đạp xe {tail}"
 
 ACTIVITY_CLASSES = {"Running": Running, "Swimming": Swimming, "Cycling": Cycling}
 
 
 def activity_from_dict(d, exercises):
-    """Dựng lại object từ dict JSON. exercises = {exercise_id: Exercise}"""
     cls = ACTIVITY_CLASSES[d["type"]]
     return cls(d["activity_id"], d["user_id"], d["date"], d["duration"],
                d.get("distance", 0), exercises.get(d.get("exercise_id")),
