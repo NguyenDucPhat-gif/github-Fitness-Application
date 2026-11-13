@@ -4,7 +4,7 @@ import threading
 import config
 from datetime import datetime
 
-
+# Import từ thư mục views
 from views.theme import apply_style, BG, ACCENT, FONT_BOLD
 from views.login_sign_in_screen import LoginFrame, ChangePasswordDialog
 from views.filter_search import FilterBar, filter_sessions
@@ -12,63 +12,54 @@ from views.treeview import SessionTable
 from views.session_form import SessionForm
 from views.bodymetric_dialog import BodyMetricDialog
 from views.plan_tab import PlanTab  
+from views.custom_widgets import CircularProgress, BarChart
 
-
+# Import từ thư mục controllers
 from controllers.data_manager import DataManager
-from models.account import Account, Admin, User 
-from models.sports import Exercise
 from controllers.workout_manager import WorkoutManager
 from controllers.crawler import update_exercises
-import views.data as data # Dùng cho tính năng nhắc lịch
 
-
-from views.custom_widgets import CircularProgress, BarChart
+# Import từ thư mục models
+from models.account import Account, Admin, User 
+from models.sports import Exercise
 
 class FitnessApp:
     def __init__(self, root):
-       self.root = root
-       self.root.title(config.APP_TITLE)
-       apply_style(self.root)
-       
-       screen_width = self.root.winfo_screenwidth()
-       screen_height = self.root.winfo_screenheight()
-       
-       w = int(screen_width * 0.85)
-       h = int(screen_height * 0.85)
-       
-       w = min(w, 1250)
-       h = min(h, 850)
-       
-       
-       x = (screen_width // 2) - (w // 2)
-       y = (screen_height // 2) - (h // 2)
-       
-       self.root.geometry(f"{w}x{h}+{x}+{y}")
-       
-       self.root.minsize(1000, 650) 
-       
-       self.current_user = None
-       
-       try:
-           
+        self.root = root
+        self.root.title(config.APP_TITLE)
+        apply_style(self.root)
+        
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        w = int(screen_width * 0.85)
+        h = int(screen_height * 0.85)
+        w = min(w, 1250)
+        h = min(h, 850)
+        x = (screen_width // 2) - (w // 2)
+        y = (screen_height // 2) - (h // 2)
+        self.root.geometry(f"{w}x{h}+{x}+{y}")
+        self.root.minsize(1000, 650) 
+        
+        self.current_user = None
+        
+        try:
+            # Đảm bảo config.py đã trỏ đúng vào thư mục data/ (VD: data/exercises.json)
             self.exercises = [Exercise.from_dict(d) for d in DataManager(config.EXERCISES_FILE).load_data()]
             self.wm = WorkoutManager(DataManager(config.ACTIVITIES_FILE), self.exercises)
             self.accounts_db = DataManager(config.ACCOUNTS_FILE)
             self.check_default_admin()
-       except Exception as e:
-           messagebox.showerror("Lỗi Hệ Thống", f"Không thể khởi tạo dữ liệu: {e}")
-           self.root.destroy()
-           return
+        except Exception as e:
+            messagebox.showerror("Lỗi Hệ Thống", f"Không thể khởi tạo dữ liệu: {e}")
+            self.root.destroy()
+            return
 
-       self.show_login()
+        self.show_login()
     
     def clear_screen(self):
-        """Xóa toàn bộ widget trên màn hình hiện tại để chuyển màn hình"""
         for widget in self.root.winfo_children():
             widget.destroy()
 
     def check_default_admin(self):
-        """Tự động tạo tài khoản admin nếu file JSON trống"""
         raw_data = self.accounts_db.load_data()
         if not raw_data:
             try:
@@ -88,112 +79,94 @@ class FitnessApp:
 
     def on_login_success(self, account_obj):
         self.current_user = account_obj
-        
-        # --- TÍNH NĂNG NHẮC LỊCH (REMINDER) ---
-        if account_obj.Access_Level() == "user":
-            try:
-                due_plans = data.plans_due_soon(account_obj._username, days=3)
-                if due_plans:
-                    msg = "Bạn có kế hoạch sắp hết hạn chưa hoàn thành:\n\n"
-                    for p in due_plans:
-                        msg += f"- {p['name']} (Hạn chót: {p['end']})\n"
-                    messagebox.showwarning("Nhắc nhở lịch tập", msg)
-            except Exception:
-                pass 
-
         self.show_main_dashboard()
 
     # ================= MÀN HÌNH CHÍNH =================
     def show_main_dashboard(self):
-     self.clear_screen()
-     self.root.geometry(config.WINDOW_SIZE)
+        self.clear_screen()
+        self.root.geometry(config.WINDOW_SIZE)
 
-    # --- 1. HEADER ---
-     header = tk.Frame(self.root, bg=ACCENT, height=50)
-     header.pack(fill="x")
-    
-     tk.Label(header, text=f"Xin chào, {self.current_user._fullname} ({self.current_user.Access_Level()})", 
-             font=FONT_BOLD, bg=ACCENT, fg="white").pack(side="left", padx=20, pady=10)
-    
-     tk.Button(header, text="Đăng xuất", command=self.handle_logout, 
-              bg="white", fg="red", font=FONT_BOLD).pack(side="right", padx=20, pady=10)
-    
-     tk.Button(header, text="Đổi mật khẩu", command=self.open_change_password, 
-              bg="lightblue", fg="black").pack(side="right", padx=10, pady=10)
-              
-     tk.Button(header, text="Chỉ số cơ thể (BMI)", command=self.open_bodymetric, 
-              bg="lightgreen", fg="black").pack(side="right", padx=10, pady=10)
+        # --- 1. HEADER ---
+        header = tk.Frame(self.root, bg=ACCENT, height=50)
+        header.pack(fill="x")
+        
+        tk.Label(header, text=f"Xin chào, {self.current_user._fullname} ({self.current_user.Access_Level()})", 
+                 font=FONT_BOLD, bg=ACCENT, fg="white").pack(side="left", padx=20, pady=10)
+        
+        tk.Button(header, text="Đăng xuất", command=self.handle_logout, 
+                  bg="white", fg="red", font=FONT_BOLD).pack(side="right", padx=20, pady=10)
+        
+        tk.Button(header, text="Đổi mật khẩu", command=self.open_change_password, 
+                  bg="lightblue", fg="black").pack(side="right", padx=10, pady=10)
+                  
+        tk.Button(header, text="Chỉ số cơ thể (BMI)", command=self.open_bodymetric, 
+                  bg="lightgreen", fg="black").pack(side="right", padx=10, pady=10)
 
-    # Nút Crawl (Chỉ Admin)
-     if self.current_user.Access_Level() == "admin":
-        tk.Button(header, text="Crawl dữ liệu (Admin)", command=self.run_crawler, 
-                  bg="orange", fg="white", font=FONT_BOLD).pack(side="right", padx=10, pady=10)
+        if self.current_user.Access_Level() == "admin":
+            tk.Button(header, text="Crawl dữ liệu (Admin)", command=self.run_crawler, 
+                      bg="orange", fg="white", font=FONT_BOLD).pack(side="right", padx=10, pady=10)
 
-    # --- 2. TẠO THANH TAB (NOTEBOOK) ---
-     notebook = ttk.Notebook(self.root)
-     notebook.pack(fill="both", expand=True, padx=10, pady=10)
+        # --- 2. TẠO THANH TAB (NOTEBOOK) ---
+        notebook = ttk.Notebook(self.root)
+        notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
-    # ================= TAB 1: QUẢN LÝ BUỔI TẬP =================
-     body = tk.Frame(notebook, bg=BG)
-     notebook.add(body, text="📝 Quản lý buổi tập")
+        # ================= TAB 1: QUẢN LÝ BUỔI TẬP =================
+        body = tk.Frame(notebook, bg=BG)
+        notebook.add(body, text="📝 Quản lý buổi tập")
 
-    # === 1.FORM VÀ NÚT BẤM  ===
-   
-     bottom_frame = tk.Frame(body, bg=BG)
-     bottom_frame.pack(side="bottom", fill="x", pady=5)
+        # === 1. FORM VÀ NÚT BẤM ===
+        bottom_frame = tk.Frame(body, bg=BG)
+        bottom_frame.pack(side="bottom", fill="x", pady=5)
 
-    # Nút thao tác 
-     btn_action = tk.Frame(bottom_frame, bg=BG)
-     btn_action.pack(side="bottom", fill="x", pady=(5, 0))
-     tk.Button(btn_action, text="Xóa buổi tập đang chọn", command=self.delete_activity, 
-              bg="red", fg="white").pack(side="left")
-     tk.Button(btn_action, text="Xuất nhật ký (TXT)", command=self.export_journal, 
-              bg="green", fg="white", font=FONT_BOLD).pack(side="right")
+        btn_action = tk.Frame(bottom_frame, bg=BG)
+        btn_action.pack(side="bottom", fill="x", pady=(5, 0))
+        tk.Button(btn_action, text="Xóa buổi tập đang chọn", command=self.delete_activity, 
+                  bg="red", fg="white").pack(side="left")
+        tk.Button(btn_action, text="Xuất nhật ký (TXT)", command=self.export_journal, 
+                  bg="green", fg="white", font=FONT_BOLD).pack(side="right")
 
-     # Form nhập liệu 
-     self.form = SessionForm(bottom_frame, user_id=self.current_user._username, on_save=self.save_activity)
-     self.form.pack(side="bottom", fill="x", pady=(5, 0))
+        self.form = SessionForm(bottom_frame, user_id=self.current_user._username, on_save=self.save_activity)
+        self.form.pack(side="bottom", fill="x", pady=(5, 0))
 
-    # === 2. PHẦN THỐNG KÊ (BIỂU ĐỒ & VÒNG TRÒN) ===
-     stats_frame = tk.Frame(body, bg="white", bd=1, relief="solid")
-     stats_frame.pack(side="top", fill="x", pady=(0, 5), ipady=5)
+        # === 2. PHẦN THỐNG KÊ ===
+        stats_frame = tk.Frame(body, bg="white", bd=1, relief="solid")
+        stats_frame.pack(side="top", fill="x", pady=(0, 5), ipady=5)
 
-     self.progress_widget = CircularProgress(stats_frame, size=100, bg="white")
-     self.progress_widget.pack(side="left", padx=20)
-    
-     goal_frame = tk.Frame(stats_frame, bg="white")
-     goal_frame.pack(side="left", padx=(0, 20))
-    
-     tk.Label(goal_frame, text="Mục tiêu Calo\n(kcal)", bg="white", font=("Segoe UI", 10, "bold")).pack()
-    
-     current_aim = getattr(self.current_user, '_UserCalories_Aim', 1000)
-     self.var_calo_goal = tk.StringVar(value=str(current_aim))
-    
-     entry_goal = tk.Entry(goal_frame, textvariable=self.var_calo_goal, width=8, justify="center", font=("Segoe UI", 10))
-     entry_goal.pack(pady=2)
-    
-     tk.Button(goal_frame, text="Lưu", command=self.save_calorie_goal, bg="#2e9d5b", fg="white", font=("Segoe UI", 8)).pack()
+        self.progress_widget = CircularProgress(stats_frame, size=100, bg="white")
+        self.progress_widget.pack(side="left", padx=20)
+        
+        goal_frame = tk.Frame(stats_frame, bg="white")
+        goal_frame.pack(side="left", padx=(0, 20))
+        
+        tk.Label(goal_frame, text="Mục tiêu Calo\n(kcal)", bg="white", font=("Segoe UI", 10, "bold")).pack()
+        
+        current_aim = getattr(self.current_user, '_UserCalories_Aim', 1000)
+        self.var_calo_goal = tk.StringVar(value=str(current_aim))
+        
+        entry_goal = tk.Entry(goal_frame, textvariable=self.var_calo_goal, width=8, justify="center", font=("Segoe UI", 10))
+        entry_goal.pack(pady=2)
+        
+        tk.Button(goal_frame, text="Lưu", command=self.save_calorie_goal, bg="#2e9d5b", fg="white", font=("Segoe UI", 8)).pack()
 
-     self.chart_widget = BarChart(stats_frame, height=120, bg="white") # Giảm chiều cao để không chiếm chỗ
-     self.chart_widget.pack(side="right", fill="x", expand=True, padx=10)
+        self.chart_widget = BarChart(stats_frame, height=120, bg="white")
+        self.chart_widget.pack(side="right", fill="x", expand=True, padx=10)
 
-    # === 3. THANH LỌC & BẢNG  ===
-     self.filter_bar = FilterBar(body, on_change=self.refresh_table)
-     self.filter_bar.pack(side="top", fill="x", pady=(0, 5))
- 
-   
-     self.table = SessionTable(body, on_double_click=self.load_to_form)
-     self.table.pack(side="top", fill="both", expand=True)
+        # === 3. THANH LỌC & BẢNG ===
+        self.filter_bar = FilterBar(body, on_change=self.refresh_table)
+        self.filter_bar.pack(side="top", fill="x", pady=(0, 5))
 
-    # ================= TAB 2: KẾ HOẠCH & TIẾN ĐỘ =================
-     tab2 = tk.Frame(notebook, bg=BG)
-     notebook.add(tab2, text="🎯 Kế hoạch & Tiến độ")
-    
-     self.plan_tab = PlanTab(tab2, self.wm)
-     self.plan_tab.pack(fill="both", expand=True)
-     self.plan_tab.set_user(self.current_user._username, self.current_user.Access_Level())
+        self.table = SessionTable(body, on_double_click=self.load_to_form)
+        self.table.pack(side="top", fill="both", expand=True)
 
-     self.refresh_table()
+        # ================= TAB 2: KẾ HOẠCH & TIẾN ĐỘ =================
+        tab2 = tk.Frame(notebook, bg=BG)
+        notebook.add(tab2, text="🎯 Kế hoạch & Tiến độ")
+        
+        self.plan_tab = PlanTab(tab2, self.wm)
+        self.plan_tab.pack(fill="both", expand=True)
+        self.plan_tab.set_user(self.current_user._username, self.current_user.Access_Level())
+
+        self.refresh_table()
 
     # ================= XỬ LÝ DỮ LIỆU =================
     def refresh_table(self):
@@ -218,10 +191,8 @@ class FitnessApp:
             filtered_data = filter_sessions(data_for_filter, **criteria)
             self.table.load(filtered_data)
             
-           
             self.update_charts(filtered_data)
             
-  
             if hasattr(self, 'plan_tab'):
                 self.plan_tab.refresh()
                 
@@ -229,17 +200,12 @@ class FitnessApp:
             messagebox.showerror("Lỗi Hiển Thị", f"Không thể hiển thị danh sách: {e}")
 
     def update_charts(self, rows):
-        """Cập nhật Vòng tròn tiến độ và Biểu đồ cột dựa trên dữ liệu đã lọc"""
-     
         total_cal = sum(item["cal"] for item in rows)
-        
-   
         target_cal = getattr(self.current_user, '_UserCalories_Aim', 1000)
         
         percent = (total_cal / target_cal) * 100 if target_cal > 0 else 0
         self.progress_widget.set(percent, f"Calo đã đốt")
 
-     
         daily_min = {}
         for item in rows:
             date_str = item["date"][:5]
@@ -253,22 +219,17 @@ class FitnessApp:
         self.chart_widget.set_data(labels, values, "Thời gian tập (Phút)")
         
     def save_calorie_goal(self):
-        """Lưu mục tiêu calo mới của người dùng"""
         try:
             new_aim = int(self.var_calo_goal.get())
             if new_aim <= 0:
                 raise ValueError
         except ValueError:
             messagebox.showwarning("Lỗi", "Mục tiêu calo phải là số nguyên dương!")
-        
             self.var_calo_goal.set(str(getattr(self.current_user, '_UserCalories_Aim', 2000)))
             return
 
-        
         if hasattr(self.current_user, '_UserCalories_Aim'):
             self.current_user._UserCalories_Aim = new_aim
-            
-         
             raw_data = self.accounts_db.load_data()
             updated = False
             for d in raw_data:
@@ -286,7 +247,6 @@ class FitnessApp:
         else:
             messagebox.showerror("Lỗi", "Tài khoản Admin không có mục tiêu calo.")
 
-        #
         self.refresh_table()
 
     def save_activity(self, act_obj):
@@ -316,7 +276,6 @@ class FitnessApp:
             messagebox.showerror("Lỗi", "Không tìm thấy dữ liệu buổi tập này.")
 
     def delete_activity(self):
-        """Xóa buổi tập đang chọn"""
         act_id = self.table.selected_id()
         if not act_id:
             messagebox.showwarning("Chú ý", "Vui lòng chọn một buổi tập trên bảng để xóa.")
@@ -334,7 +293,6 @@ class FitnessApp:
             messagebox.showerror("Lỗi Xóa Dữ Liệu", f"Đã xảy ra lỗi: {e}")
 
     def export_journal(self):
-        """Xuất danh sách buổi tập ra file văn bản (.txt)"""
         activities_to_export = []
         for a in self.wm.activities_list:
             if self.current_user.Access_Level() != "admin" and a.user_id != self.current_user._username:
@@ -397,7 +355,6 @@ class FitnessApp:
             messagebox.showerror("Lỗi", f"Không thể mở form đổi mật khẩu: {e}")
 
     def open_bodymetric(self):
-        """Mở cửa sổ nhập chỉ số cơ thể (BMI)"""
         try:
             BodyMetricDialog(self.root, username=self.current_user._username)
         except Exception as e:
@@ -431,15 +388,6 @@ class FitnessApp:
                     messagebox.showerror("Lỗi Crawl", err_msg)
                     
                 self.root.after(0, show_crawl_error)
-                
-            except Exception as e:
-                print("LỖI KHÁC:", e)
-                err_msg = str(e)
-                
-                def show_general_error():
-                    messagebox.showerror("Lỗi Không Xác Định", err_msg)
-                    
-                self.root.after(0, show_general_error)
                 
         messagebox.showinfo("Thông báo", "Bắt đầu crawl dữ liệu, vui lòng đợi trong giây lát...")
         threading.Thread(target=task, daemon=True).start()
