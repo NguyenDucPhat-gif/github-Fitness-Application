@@ -1,3 +1,4 @@
+import config
 import tkinter as tk
 from tkinter import ttk, messagebox
 from controllers.data_manager import DataManager
@@ -14,7 +15,7 @@ class ChangePasswordDialog(tk.Toplevel):
         self.transient(master)
         self.columnconfigure(1, weight=1)
         
-        self.db = DataManager("accounts.json")
+        self.db = DataManager(config.ACCOUNTS_FILE)
 
         self.var_user = tk.StringVar(value=prefill)
         self.vars = []
@@ -91,7 +92,7 @@ class LoginFrame(tk.Frame):
         self.on_success = on_success
         
        
-        self.db = DataManager("accounts.json")
+        self.db = DataManager(config.ACCOUNTS_FILE)
  
        
         self.columnconfigure(0, weight=1)
@@ -148,22 +149,17 @@ class LoginFrame(tk.Frame):
 
        raw_data = self.db.load_data()
        for d in raw_data:
-           try:
-               acc = Account.from_dict(d)
-               if acc._username == u:
-                   if acc.Sign_In(p):
-                       self.var_pw.set("")
-                       self.on_success(acc) 
-                       return
-                   else:
-                       messagebox.showerror("Lỗi", "Mật khẩu không đúng.")
-                       return
-           except Exception as e:
-          
-               print(f"Lỗi khi tải tài khoản: {e}") 
-               continue
-               
-       messagebox.showerror("Lỗi", "Tên đăng nhập không tồn tại.")
+            try:
+                acc = Account.from_dict(d)
+                if acc._username == u and acc.Sign_In(p):
+                    self.var_pw.set("")
+                    self.on_success(acc) 
+                    return
+            except Exception as e:
+                print("LỖI ĐỌC TÀI KHOẢN:", e) 
+                continue
+                
+       messagebox.showerror("Lỗi", "Sai tên đăng nhập hoặc mật khẩu.")
        
 
     def change_password(self):
