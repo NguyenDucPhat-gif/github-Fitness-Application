@@ -1,7 +1,7 @@
 
 from datetime import datetime
 
-from models.plan import is_valid_date, date_key
+from models.plan import is_valid_date, date_key, date_with_now
 
 
 class Goal:
@@ -20,7 +20,7 @@ class Goal:
             raise ValueError("Chỉ tiêu phải là số lớn hơn 0")
         if not is_valid_date(start_date) or not is_valid_date(end_date):
             raise ValueError("Ngày bắt đầu và ngày kết thúc phải có dạng dd/mm/yyyy")
-        if date_key(start_date) < date_key(today_str):
+        if date_with_now(start_date) is False:
             raise ValueError("Ngày bắt đầu không được ở trong quá khứ")
         if date_key(end_date) < date_key(start_date):
             raise ValueError("Ngày kết thúc phải sau hoặc bằng ngày bắt đầu")
