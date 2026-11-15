@@ -17,9 +17,10 @@ class WorkoutManager:
             self.activities_list.append(activity_from_dict(d, self.exercises))
 
     def add_activity(self, act):
-        for act_in_list in self.activities_list:
-           if act_in_list.activity_id == act.activity_id:     
-            return False
+        for a in self.activities_list:
+            if a.activity_id == act.activity_id:
+                return False 
+                
         if self.db.create(act.to_dict()):       
              self.activities_list.append(act)                   
              return True
@@ -29,16 +30,6 @@ class WorkoutManager:
         self.activities_list = [a for a in self.activities_list if a.activity_id != activity_id]
         return self.db.delete("activity_id", activity_id)
 
-    def filter(self, sport=None, date=None):          
-        return [a for a in self.activities_list
-                if (sport is None or a.activity_type == sport)
-                and (date is None or a.date == date)]
-
-    def get_total_calories_by_date(self, date):
-        return round(sum(a.calories for a in self.filter(date=date)), 1)
-
-    def get_total_duration(self, sport=None, date=None):
-        return sum(a.duration for a in self.filter(sport, date))
     
     def update_activity(self, activity_id, new_act):
         if new_act.activity_id!= activity_id:return False
