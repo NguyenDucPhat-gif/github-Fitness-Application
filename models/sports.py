@@ -86,6 +86,13 @@ class Running(SportActivity):
                          exercise, intensity)
         self.activity_type = "Running"
 
+    def calculate_calories(self):
+        base_cal = super().calculate_calories() 
+        if self.distance > 0:
+            distance_cal = self.distance * self.exercise.calo_rate 
+            return round(base_cal + distance_cal, 1)
+            
+        return base_cal
 
     def get_summary(self):
         tail = super().get_summary() 
@@ -99,7 +106,9 @@ class Swimming(SportActivity):
         super().__init__(activity_id, user_id, date, duration, distance,
                          exercise, intensity)
         self.activity_type = "Swimming"
-
+    def calculate_calories(self):
+        base_cal = super().calculate_calories()
+        return round(base_cal * 1.1, 1)
     def get_summary(self):
         tail = super().get_summary()
         return f"Bơi {tail}"
@@ -112,7 +121,9 @@ class Cycling(SportActivity):
                          exercise, intensity)
         self.activity_type = "Cycling"
 
-
+    def calculate_calories(self):
+        base_cal = super().calculate_calories()
+        return round(base_cal * 0.9, 1)
     def get_summary(self):
         tail = super().get_summary()
         if self.distance > 0:
@@ -123,7 +134,7 @@ ACTIVITY_CLASSES = {"Running": Running, "Swimming": Swimming, "Cycling": Cycling
 
 
 def activity_from_dict(d, exercises):
-    cls = ACTIVITY_CLASSES[d["type"]]
-    return cls(d["activity_id"], d["user_id"], d["date"], d["duration"],
+    act = ACTIVITY_CLASSES[d["type"]]
+    return act(d["activity_id"], d["user_id"], d["date"], d["duration"],
                d.get("distance", 0), exercises.get(d.get("exercise_id")),
                d.get("intensity", "Vừa"))
