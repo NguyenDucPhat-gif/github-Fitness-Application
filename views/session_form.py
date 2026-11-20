@@ -17,7 +17,7 @@ class SessionForm(ttk.LabelFrame):
         self.editing_id = None
         
     
-        self.exercises = [Exercise.from_dict(d) for d in DataManager("exercises.json").load_data()]
+        self.exercises = [Exercise.from_dict(d) for d in DataManager(config.EXERCISES_FILE).load_data()]
         
         for c in range(4):
             self.columnconfigure(c, weight=1 if c % 2 else 0)
@@ -66,22 +66,37 @@ class SessionForm(ttk.LabelFrame):
 
     def _submit(self):
         sport_vi = self.cb_sport.get()
-        sport_en = config.SPORT_EN.get(sport_vi, sport_vi) 
+        sport_en = config.SPORT_EN.get(sport_vi, sport_vi)
         ex_name = self.cb_ex.get()
-        
+
         if not sport_en or not ex_name:
             messagebox.showwarning("Lỗi", "Hãy chọn môn và bài tập.")
             return
 
-     
         try:
             minutes = float(self.var_min.get())
-            if minutes <= 0: 
+            dist = float(self.var_dist.get()) if self.var_dist.get().strip() else 0.0
+            if minutes <= 0 or dist < 0:
                 raise ValueError
-            dist = float(self.var_dist.get()) if self.var_dist.get().strip() else 0
         except ValueError:
-            messagebox.showwarning("Lỗi", "Thời lượng/Quãng đường phải là số dương.")
+            messagebox.showwarning("Lỗi", "Thời lượng phải > 0 và quãng đường phải >= 0.")
             return
+
+        ex_obj = next((e for e in self.exercises if e.name == ex_name), None)
+        act_id = self.editing_id if self.editing_id else f"A{int(datetime.now().timestamp())}"
+
+        if sport_en == "Running":
+            act = Running(act_id, self.user_id, self.date.get(), minutes, dist, ex_obj, self.var_int.get())
+        elif sport_en == "Swimming":
+            act = Swimming(act_id, self.user_id, self.date.get(), minutes, dist, ex_obj, self.var_int.get())
+        else:
+            act = Cycling(act_id, self.user_id, self.date.get(), minutes, dist, ex_obj, self.var_int.get())
+
+        if self.on_save:
+            if self.on_save(act):
+                self.clear()
+        else:
+            self.clear()
 
         ex_obj = next((e for e in self.exercises if e.name == ex_name), None)
         act_id = self.editing_id if self.editing_id else f"A{int(datetime.now().timestamp())}"

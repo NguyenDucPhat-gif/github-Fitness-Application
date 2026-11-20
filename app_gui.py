@@ -150,14 +150,17 @@ class FitnessApp:
             else:
                 success = self.wm.add_activity(act_obj)
                 msg = "Đã thêm buổi tập mới!"
-                
+    
             if success:
                 messagebox.showinfo("Thành công", msg)
                 self.refresh_table()
+                return True
             else:
                 messagebox.showerror("Lỗi", "Trùng mã ID hoặc lỗi lưu file.")
+                return False
         except Exception as e:
             messagebox.showerror("Lỗi", f"Đã xảy ra lỗi: {e}")
+        return False
 
     def load_to_form(self):
         act_id = self.dashboard.table.selected_id()

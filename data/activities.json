@@ -42,5 +42,27 @@
         "distance": 0,
         "intensity": "Vừa",
         "calories": 40.0
+    },
+    {
+        "activity_id": "A1795192641",
+        "user_id": "phunqoo",
+        "type": "Swimming",
+        "exercise_id": "E03",
+        "date": "20/11/2026",
+        "duration": 120.0,
+        "distance": 10.0,
+        "intensity": "Vừa",
+        "calories": 1320.0
+    },
+    {
+        "activity_id": "A1795192642",
+        "user_id": "phunqoo",
+        "type": "Swimming",
+        "exercise_id": "E03",
+        "date": "20/11/2026",
+        "duration": 120.0,
+        "distance": 10.0,
+        "intensity": "Vừa",
+        "calories": 1320.0
     }
 ]

@@ -87,11 +87,11 @@ class Running(SportActivity):
         self.activity_type = "Running"
 
     def calculate_calories(self):
-        base_cal = super().calculate_calories() 
+        base_cal = super().calculate_calories()
         if self.distance > 0:
-            distance_cal = self.distance * self.exercise.calo_rate 
+            rate = self.exercise.calo_rate if self.exercise else 10
+            distance_cal = self.distance * rate
             return round(base_cal + distance_cal, 1)
-            
         return base_cal
 
     def get_summary(self):

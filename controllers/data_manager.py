@@ -1,4 +1,4 @@
-
+import os
 import json
 
 class DataManager:
@@ -23,8 +23,10 @@ class DataManager:
             return []
 
     def save_data(self, data):
-       
         try:
+            folder = os.path.dirname(self.file_path)
+            if folder:
+                os.makedirs(folder, exist_ok=True)
             with open(self.file_path, 'w', encoding='utf-8') as file:
                 json.dump(data, file, ensure_ascii=False, indent=4)
             return True
